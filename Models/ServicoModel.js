@@ -7,10 +7,10 @@ const Servico = db.sql.define('SERVICO',{
         primaryKey: true,
         type: db.Sequelize.INTEGER
       },
-    DESCRICAO : {
+    NOME : {
         type:db.Sequelize.STRING 
     },
-    VALOR : {
+    PRECODEVENDA : {
         type:db.Sequelize.DOUBLE
     },
     LUCRO : {
@@ -21,6 +21,8 @@ const Servico = db.sql.define('SERVICO',{
     },
     GANHOFUN : {
         type:db.Sequelize.DOUBLE
+    },CODVERIF:{
+        type:db.Sequelize.INTEGER
     }
 });
 

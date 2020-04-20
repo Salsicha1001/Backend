@@ -9,6 +9,7 @@ const cors = require('cors')
 server = require('http').Server(app)
 const Product = require('./Models/Products')
 const OrdemService = require('./Models/OrderService')
+const Cart = require('./Models/CartModel')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extend:true}))
 app.use(cors())
@@ -55,13 +56,38 @@ c.save((err, cliente)=>{
 
  
         })
+
+        app.get('/getcart',(req,res)=>{
+          Cart.findAll().then((r)=>{
+            res.send(r)
+          })
+        })
+      app.post('/savecart',(req,res)=>{
+        for(let key in req.body.item){
+       c = new Cart({
+          IDOS:req.body.idos,
+          NOME:req.body.item[key].NOME,
+          PRECODEVENDA:req.body.item[key].PRECODEVENDA,
+          totalPrice:req.body.totalPrice,
+          totalQtd:req.body.totalQtd,
+          CODVERIF:req.body.CODVERIF
+        })
+        c.save((err, cart)=>{
+          if(err)
+          res.status(500).send(err)
+          else
+          res.status(200).send(cart)
+      }) 
+    }
+      })
 app.post('/saveservico',(req,res)=>{
   s = new Servico({
-    DESCRICAO:req.body.descricao,
+    NOME:req.body.descricao,
     LUCRO:req.body.lucro,
-    VALOR:req.body.valor,
+    PRECODEVENDA:req.body.valor,
     GANHODONO:req.body.ganhodono,
-    GANHOFUN:req.body.ganhoFuncionario
+    GANHOFUN:req.body.ganhoFuncionario,
+    CODVERIF:Math.floor(Math.random() * 65536)
   })
 
 
@@ -82,7 +108,14 @@ app.delete('/deleteserv/:id',(req,res)=>{
   Servico.destroy({where:{'id':req.params.id}}).then(()=>{
   })
 })
-
+app.delete('/deletecart/:id',(req, res)=>{
+  Cart.destroy({where:{'id':req.params.id}}).then(()=>{
+  })
+})
+app.delete('/deleteprod/:id',(req,res)=>{
+  Product.destroy({where:{'id':req.params.id}}).then(()=>{
+  })
+})
 app.get('/listfun',(req,res)=>{
   Funcionario.findAll().then((funci)=>{
     res.send(funci)
@@ -147,8 +180,13 @@ app.post('/saveProduct', function(req,res){
     COD_BARRA:req.body.codBarras,
     NOME: req.body.name,
     MARCA:req.body.marca,
+    EMPRESA: req.body.Empresa,
     QTD: req.body.qtd,
-    PRICE: req.body.price
+    PRECODECOMPRA: req.body.precoDeCompra,
+    PRECODEVENDA:req.body.precoDeVenda,
+    LUCRO:req.body.lucro,
+    CODVERIF:Math.floor(Math.random() * 65536)
+    
   })
 
     p.save((err,prod)=>{

@@ -7,14 +7,26 @@ const Product = db.sql.define('Product',{
     NOME : {
         type:db.Sequelize.STRING
     },
+    EMPRESA : {
+        type:db.Sequelize.STRING
+    },
     MARCA : {
         type:db.Sequelize.STRING
     },
     QTD : {
         type:db.Sequelize.INTEGER
     },
-    PRICE : {
+    PRECODECOMPRA : {
         type:db.Sequelize.DOUBLE
+    },
+    PRECODEVENDA : {
+        type:db.Sequelize.DOUBLE
+    }, 
+    LUCRO:{
+        type:db.Sequelize.INTEGER
+    },
+    CODVERIF:{
+        type:db.Sequelize.INTEGER
     }
 
     
