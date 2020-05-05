@@ -9,10 +9,16 @@ const OrdemService = db.sql.define('OrdemService',{
         type: db.Sequelize.INTEGER
       },
     CLIENTE : {
-        type:db.Sequelize.STRING 
+        type:db.Sequelize.STRING ,
+        
     },
     IDCLIENT : {
-        type:db.Sequelize.STRING 
+        type:db.Sequelize.INTEGER ,
+        allowNull: false,
+        references: {      
+          model: 'clients',
+          key: 'id'
+        }
     },
     MARCA : {
         type:db.Sequelize.STRING
@@ -30,7 +36,12 @@ const OrdemService = db.sql.define('OrdemService',{
         type:db.Sequelize.STRING
     },
     IDFUNCIONARIO : {
-        type:db.Sequelize.STRING
+        type:db.Sequelize.INTEGER,
+        allowNull: false,
+        references: {      
+          model: 'funcionarios',
+          key: 'id'
+        }
     },
     DATEI : {
         type:db.Sequelize.STRING
@@ -42,7 +53,9 @@ const OrdemService = db.sql.define('OrdemService',{
         type:db.Sequelize.STRING
     },
         
-    
+    STATUS:{
+        type:db.Sequelize.STRING
+    }
     
 });
 //OrdemService.sync({force:true})

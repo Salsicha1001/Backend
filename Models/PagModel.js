@@ -1,6 +1,6 @@
 const db = require('../Conect/conection')
 
-const Cart = db.sql.define('CART',{
+const Pag = db.sql.define('PAGAMENTOS',{
     id: {
         allowNull: false,
         autoIncrement: true,
@@ -15,22 +15,23 @@ const Cart = db.sql.define('CART',{
           key: 'id'
         }
       },
-      NOME:{
+      FORMA:{
           type:db.Sequelize.STRING
       },
-      PRECODEVENDA:{
-          type:db.Sequelize.DOUBLE
-      },
-      totalPrice:{
-          type:db.Sequelize.DOUBLE
-      },
-      totalQtd:{
+      PARCELA:{
           type:db.Sequelize.INTEGER
       },
-      CODVERIF:{
-        type:db.Sequelize.INTEGER
-    }  
-    });
-    
-  //Cart.sync({})
-    module.exports = Cart
+      TOTAL:{
+          type:db.Sequelize.DOUBLE
+      },
+      PAGO:{
+          type:db.Sequelize.DOUBLE
+      },
+      RESTANTE:{
+          type:db.Sequelize.DOUBLE
+      },
+
+    })
+
+      //Pag.sync({})
+      module.exports = Pag

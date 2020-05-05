@@ -10,6 +10,9 @@ server = require('http').Server(app)
 const Product = require('./Models/Products')
 const OrdemService = require('./Models/OrderService')
 const Cart = require('./Models/CartModel')
+const Pag = require('./Models/PagModel')
+
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extend:true}))
 app.use(cors())
@@ -108,8 +111,12 @@ app.delete('/deleteserv/:id',(req,res)=>{
   Servico.destroy({where:{'id':req.params.id}}).then(()=>{
   })
 })
+app.delete('/deleteOs/:id',(req,res)=>{
+  OrdemService.destroy({where:{'id':req.params.id}}).then(()=>{
+  })
+})
 app.delete('/deletecart/:id',(req, res)=>{
-  Cart.destroy({where:{'id':req.params.id}}).then(()=>{
+  Cart.destroy({where:{'CODVERIF':req.params.id}}).then(()=>{
   })
 })
 app.delete('/deleteprod/:id',(req,res)=>{
@@ -121,7 +128,10 @@ app.get('/listfun',(req,res)=>{
     res.send(funci)
   })
 })
-
+app.delete('/deletclient/:id',(req,res)=>{
+  Client.destroy({where:{'id':req.params.id}}).then(()=>{
+  })
+})
 app.post('/savefuncionario',(req,res)=>{
   f = new Funcionario({
     NOME:req.body.NOME,
@@ -174,7 +184,54 @@ app.patch('/list/:id', function(req,res){
  
 
 })
+app.patch('/editStt/:id',(req,res)=>{
 
+  OrdemService.findOne({where:{'id':req.params.id}}).then((os)=>{
+    os.STATUS=req.body.STATUS
+    
+   os.save((err, os)=>{
+    if(err)
+    res.status(500).send(err)
+    else
+    res.status(200).send(os)
+  })
+  })
+
+})
+app.patch('/editObs/:id',(req,res)=>{
+
+  OrdemService.findOne({where:{'id':req.params.id}}).then((os)=>{
+    os.OBS=req.body.OBS
+    
+   os.save((err, os)=>{
+    if(err)
+    res.status(500).send(err)
+    else
+    res.status(200).send(os)
+  })
+  })
+
+})
+app.patch('/addqtd/:id',(req,res)=>{
+  
+  Cart.findOne({where:{CODVERIF:req.params.id}}).then((c)=>{
+    
+    for(let key in req.body.item){
+    c.NOME=req.body.item[key].NOME,
+    c.PRECODEVENDA=req.body.item[key].PRECODEVENDA,
+    c.totalPrice=req.body.totalPrice,
+    c.totalQtd=req.body.totalQtd,
+    c.CODVERIF=req.body.CODVERIF
+    }
+    c.save((err,cart)=>{
+      if(err)
+      res.status(500).send(err)
+      else
+      res.status(200).send(cart)
+    })
+  })
+
+})
 app.post('/saveProduct', function(req,res){
   p = new Product({
     COD_BARRA:req.body.codBarras,
@@ -232,36 +289,33 @@ app.post('/saveos',(req,res)=>{
       DATEP:req.body.DATEP,
       OBS:req.body.OBS,
       IDCLIENT:req.body.IDCLIENT,
-      IDFUNCIONARIO:req.body.IDFUNCIONARIO
+      IDFUNCIONARIO:req.body.IDFUNCIONARIO,
+      STATUS:'Espera'
     })
 
-    console.log(os)
-    os.save((err,os)=>{
+   
+   os.save((err,o)=>{
       if(err)
       res.status(500).send(err)
       else
-      res.status(200).send(os)
+      res.status(200).send(o)
+      
     })
 
+    
+/*s = new Status({
+  STATU:'Espera'
 })
-//async function generate(){
-  //  for(let i=0; i<10;i++ ){
- //   let p = new Client({
- //       NAME : Faker.commerce.productName()
-  //  })
-   // try{
-  //  await p.save()
-  //  }
-   // catch(err){
-  //      console.log(err)
- //   }
-//}
-//}
+s.save((err, s)=>{
+  if(err)
+      res.status(500).send(err)
+      else
+      res.status(200).send(s)
+    })*/
+})
+
+
 app.listen(3000, function(){
   console.log("subindo")
 });
 
-
-//generate().then(()=>{
- //   console.log("ok")
-//})
