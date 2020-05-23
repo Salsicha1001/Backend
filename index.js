@@ -15,6 +15,7 @@ const Pag = require('./Models/PagModel')
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extend:true}))
+app.use(bodyParser.json());
 app.use(cors())
  
 app.use(function(err, req, res, next) {
@@ -33,7 +34,7 @@ app.get('/list',function(req,res){
 })
 
 
-app.post('/saveclient',function(req,res){
+app.post('/saveclient',function(req,res,next){
 
  c = new Client({
   NAME : req.body.NAME,
@@ -55,6 +56,7 @@ c.save((err, cliente)=>{
     res.status(500).send(err)
     else
     res.status(200).send(cliente)
+    next()
 }) 
 
  
@@ -65,7 +67,9 @@ c.save((err, cliente)=>{
             res.send(r)
           })
         })
-      app.post('/savecart',(req,res)=>{
+
+      app.post('/savecart',(req,res, next)=>{
+       
         for(let key in req.body.item){
        c = new Cart({
           IDOS:req.body.idos,
@@ -78,28 +82,60 @@ c.save((err, cliente)=>{
         c.save((err, cart)=>{
           if(err)
           res.status(500).send(err)
-          else
+          else{
           res.status(200).send(cart)
+          next()
+          }
       }) 
     }
+   
       })
-app.post('/saveservico',(req,res)=>{
+
+   app.post('/savepag',(req,res, next)=>{
+     p = new Pag({
+       IDOS: req.body.IDOS,
+       FORMA:req.body.FORMA,
+       PARCELA:req.body.PARCELA,
+       TOTAL:req.body.TOTAL,
+       PAGO:req.body.PAGO,
+       RESTANTE:req.body.RESTANTE
+     })
+     p.save((err,pg)=>{
+       if(err)
+       res.status(500).send(err)
+       else
+       res.status(200).send(pg)
+       next()
+     })
+     
+   })   
+
+
+   app.get('/getpag/:id',(req,res)=>{
+     Pag.findAll({where:{IDOS:req.params.id}}).then((p)=>{
+       res.send(p)
+     })
+   })
+app.post('/saveservico',(req,res,next )=>{
   s = new Servico({
     NOME:req.body.descricao,
     LUCRO:req.body.lucro,
     PRECODEVENDA:req.body.valor,
     GANHODONO:req.body.ganhodono,
     GANHOFUN:req.body.ganhoFuncionario,
-    CODVERIF:Math.floor(Math.random() * 65536)
+    CODVERIF:Math.floor(Math.random() * 999999)
   })
 
 
   s.save((err, servico)=>{
     if(err)
     res.status(500).send(err)
-    else
+    else{
     res.status(200).send(servico)
+    next()
+    }
 }) 
+
 })
 app.get('/listserv',(req,res)=>{
   Servico.findAll().then((s)=>{
@@ -107,23 +143,26 @@ app.get('/listserv',(req,res)=>{
   })
 })
 
-app.delete('/deleteserv/:id',(req,res)=>{
+app.delete('/deleteserv/:id',(req,res, next)=>{
   Servico.destroy({where:{'id':req.params.id}}).then(()=>{
   })
+  
 })
-app.delete('/deleteOs/:id',(req,res)=>{
+app.delete('/deleteOs/:id',(req,res, next)=>{
   OrdemService.destroy({where:{'id':req.params.id}}).then(()=>{
   })
 })
-app.delete('/deletecart/:id',(req, res)=>{
-  Cart.destroy({where:{'CODVERIF':req.params.id}}).then(()=>{
-  })
+app.delete('/deletecart/:id/:id1',(req, res, next)=>{
+ 
+Cart.destroy({where:{'CODVERIF':req.params.id, 'IDOS':req.params.id1}}).then(()=>{  })
+
 })
-app.delete('/deleteprod/:id',(req,res)=>{
+app.delete('/deleteprod/:id',(req,res, next)=>{
   Product.destroy({where:{'id':req.params.id}}).then(()=>{
   })
+ 
 })
-app.get('/listfun',(req,res)=>{
+app.get('/listfun',(req,res, next)=>{
   Funcionario.findAll().then((funci)=>{
     res.send(funci)
   })
@@ -132,7 +171,7 @@ app.delete('/deletclient/:id',(req,res)=>{
   Client.destroy({where:{'id':req.params.id}}).then(()=>{
   })
 })
-app.post('/savefuncionario',(req,res)=>{
+app.post('/savefuncionario',(req,res, next)=>{
   f = new Funcionario({
     NOME:req.body.NOME,
     CPF:req.body.CPF,
@@ -153,10 +192,12 @@ app.post('/savefuncionario',(req,res)=>{
       res.status(500).send(err)
       else
       res.status(200).send(func)
+      next()
     })
   },2000)
+  
 })
-app.patch('/list/:id', function(req,res){
+app.patch('/list/:id', function(req,res, next){
     Client.findOne({id:req.params.id}).then((cliente)=>{
     
       cliente.NAME = req.body.NAME
@@ -178,10 +219,11 @@ app.patch('/list/:id', function(req,res){
         res.status(500).send(err)
         else
         res.status(200).send(cliente)
+        next()
       })
     
     })
- 
+
 
 })
 app.patch('/editStt/:id',(req,res)=>{
@@ -198,7 +240,7 @@ app.patch('/editStt/:id',(req,res)=>{
   })
 
 })
-app.patch('/editObs/:id',(req,res)=>{
+app.patch('/editObs/:id',(req,res, next)=>{
 
   OrdemService.findOne({where:{'id':req.params.id}}).then((os)=>{
     os.OBS=req.body.OBS
@@ -208,13 +250,14 @@ app.patch('/editObs/:id',(req,res)=>{
     res.status(500).send(err)
     else
     res.status(200).send(os)
+    next()
   })
   })
 
 })
-app.patch('/addqtd/:id',(req,res)=>{
+app.patch('/addqtd/:id/:id1/:id2',(req,res, next)=>{
   
-  Cart.findOne({where:{CODVERIF:req.params.id}}).then((c)=>{
+  Cart.findOne({where:{'CODVERIF':req.params.id, 'IDOS':req.params.id1, 'id':req.params.id2}}).then((c)=>{
     
     for(let key in req.body.item){
     c.NOME=req.body.item[key].NOME,
@@ -228,11 +271,12 @@ app.patch('/addqtd/:id',(req,res)=>{
       res.status(500).send(err)
       else
       res.status(200).send(cart)
+      next()
     })
   })
 
 })
-app.post('/saveProduct', function(req,res){
+app.post('/saveProduct', function(req,res, next){
   p = new Product({
     COD_BARRA:req.body.codBarras,
     NOME: req.body.name,
@@ -242,7 +286,7 @@ app.post('/saveProduct', function(req,res){
     PRECODECOMPRA: req.body.precoDeCompra,
     PRECODEVENDA:req.body.precoDeVenda,
     LUCRO:req.body.lucro,
-    CODVERIF:Math.floor(Math.random() * 65536)
+    CODVERIF:Math.floor(Math.random() * 9999999)
     
   })
 
@@ -251,6 +295,7 @@ app.post('/saveProduct', function(req,res){
       res.status(500).send(err)
       else
       res.status(200).send(prod)
+      next()
     })
 
 })
@@ -263,11 +308,26 @@ app.get('/getproducts',function(req,res){
 })
 
 app.get('/listosall',(req,res)=>{
-  OrdemService.findAll().then((o)=>{
+    OrdemService.findAll({where:{STATUS:['Aprovado','Espera','Entregue']},order: [
+      ['id', 'DESC'], 
+],}).then((o)=>{
     res.send(o)
   })
 })
-
+app.get('/listosneg',(req,res)=>{
+  OrdemService.findAll({where:{STATUS:['Negado']},order: [
+    ['id', 'DESC'], 
+],}).then((o)=>{
+  res.send(o)
+})
+})
+app.get('/listosfin',(req,res)=>{
+  OrdemService.findAll({where:{STATUS:['Finalizado']},order: [
+    ['id', 'DESC'], 
+],}).then((o)=>{
+  res.send(o)
+})
+})
 app.get('/listos/:id',(req,res)=>{
     console.log(req.params.id)
     a = req.params.id
@@ -276,7 +336,7 @@ app.get('/listos/:id',(req,res)=>{
       res.send(o)
     })
 })
-app.post('/saveos',(req,res)=>{
+app.post('/saveos',(req,res, next)=>{
  
     os = new OrdemService({
       CLIENTE:req.body.CLIENTE,
@@ -299,19 +359,11 @@ app.post('/saveos',(req,res)=>{
       res.status(500).send(err)
       else
       res.status(200).send(o)
-      
+      next()
     })
 
     
-/*s = new Status({
-  STATU:'Espera'
-})
-s.save((err, s)=>{
-  if(err)
-      res.status(500).send(err)
-      else
-      res.status(200).send(s)
-    })*/
+
 })
 
 
